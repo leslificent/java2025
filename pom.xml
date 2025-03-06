@@ -23,7 +23,7 @@
         <configuration>
           <archive>
             <manifest>
-              <mainClass>org.example.MainClass</mainClass>
+              <mainClass>org.example.Main</mainClass>
             </manifest>
           </archive>
         </configuration>
