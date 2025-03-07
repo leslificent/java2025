@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Загрузка банковских данных</title>
+    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<h1>Загрузка данных банков</h1>
+
+<!-- Year selection dropdown -->
+<label for="yearSelect">Выберите год:</label>
+<select id="yearSelect">
+    <!-- Add some default years or populate dynamically -->
+    <option value="2023">2023</option>
+    <option value="2022">2022</option>
+    <option value="2021">2021</option>
+    <!-- Add more years as needed -->
+</select>
+<!-- Table to display bank data -->
+<table border="1" id="bankTable">
+    <thead>
+    <tr>
+        <th>Рег. номер</th>
+        <th>Название</th>
+        <th>Краткое название</th>
+        <th>Полное название</th>
+        <th>Адрес</th>
+        <th>Страна</th>
+        <th>Группа банка</th>
+        <th>МФО</th>
+        <th>Тип</th>
+        <th>Описание</th> <!-- New column for description -->
+        <th>Значение</th> <!-- New column for value -->
+        <th>Дата</th> <!-- New column for date -->
+        <th>ТЗЭП</th> <!-- New column for tzep -->
+    </tr>
+    </thead>
+    <tbody id="bankTableBody">
+    <!-- Rows will be dynamically populated -->
+    </tbody>
+</table>
+
+<!-- Buttons -->
+<button onclick="scrapeData()">Собрать данные</button>
+<button onclick="fetchListings()">Показать объявления</button>
+
+</body>
+</html>
