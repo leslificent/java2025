@@ -15,5 +15,4 @@ public class BankApiResponse {
     private double value;
     private String tzep;
 
-    // Getters and Setters
 }

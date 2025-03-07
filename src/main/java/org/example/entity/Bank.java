@@ -9,13 +9,13 @@ import lombok.Data;
 public class Bank {
 
     @Id
-    private String regnum;       // Регистрационный номер или идентификатор (например, BS3_AmountsDueCorpNonres)
-    private String name;         // Название записи (например, "Кошти суб'єктів господарювання-нерезидентів")
-    private String description;  // Описание на английском языке
-    private String categoryCode; // Идентификатор записи (например, "BS3_AmountsDueCorpNonres")
-    private String unit;         // Частота (например, "M")
-    private int level;           // Уровень записи (например, 4)
-    private String date;         // Дата (например, 20160101)
-    private double value;        // Значение (например, 30551.5611)
-    private String tzep;         // Дополнительное поле (например, T070_7)
+    private String registration_number;
+    private String name;
+    private String description;
+    private String categoryCode;
+    private String unit;
+    private int level;
+    private String date;
+    private double value;
+    private String addition;
 }

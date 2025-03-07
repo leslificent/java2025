@@ -28,10 +28,9 @@ public class WebScraperService {
             Elements listings = doc.select("div[data-cy='l-card']");
 
             for (Element listing : listings) {
-                // Update the selector to correctly target the title element
-                String title = listing.select("h6").text(); // Adjust this if necessary
+                String title = listing.select("h6").text();
                 if (title.isEmpty()) {
-                    title = "No Title Available"; // Provide a default title if it's empty
+                    title = "No Title Available";
                 }
                 String price = listing.select("p").text();
                 String link = listing.select("a").attr("href");

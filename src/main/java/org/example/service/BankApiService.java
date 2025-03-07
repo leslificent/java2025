@@ -27,45 +27,36 @@ public class BankApiService {
     private BankRepository bankRepository;
 
     public List<Bank> getBanksFromApi(String year) {
-        // Формируем запрос с выбором года (год в формате YYYY0101)
-        String date = year + "0101"; // Формат даты: YYYY0101
-
-
+        String date = year + "0101";
         String url = UriComponentsBuilder.fromHttpUrl(API_URL)
                 .queryParam("date", date)
                 .queryParam("period", "m")
                 .toUriString();
 
-        // Отправляем запрос
         ResponseEntity<BankApiResponse[]> response = restTemplate.getForEntity(url + "&json", BankApiResponse[].class);
 
-        // Проверяем, что запрос успешный
-        // Проверяем, что запрос успешный
         if (response.getStatusCode() == HttpStatus.OK) {
             List<BankApiResponse> bankApiResponses = Arrays.asList(response.getBody());
 
-            // Преобразуем данные в сущности и сохраняем в базу данных
             List<Bank> banks = new ArrayList<>();
             for (BankApiResponse apiResponse : bankApiResponses) {
                 Bank bank = new Bank();
-                bank.setRegnum(apiResponse.getId_api());  // Используем id_api как регномер
-                bank.setName(apiResponse.getTxt());     // Используем описание на украинском
-                bank.setDescription(apiResponse.getTxten()); // Описание на английском
-                bank.setCategoryCode(apiResponse.getId_api()); // Идентификатор записи
-                bank.setUnit(apiResponse.getFreq());   // Частота
-                bank.setLevel(apiResponse.getLeveli()); // Уровень записи
-                bank.setDate(apiResponse.getDt());     // Дата
-                bank.setValue(apiResponse.getValue()); // Значение (например, 30551.5611)
-                bank.setTzep(apiResponse.getTzep());   // Дополнительное поле
+                bank.setRegistration_number(apiResponse.getId_api());
+                bank.setName(apiResponse.getTxt());
+                bank.setDescription(apiResponse.getTxten());
+                bank.setCategoryCode(apiResponse.getId_api());
+                bank.setUnit(apiResponse.getFreq());
+                bank.setLevel(apiResponse.getLeveli());
+                bank.setDate(apiResponse.getDt());
+                bank.setValue(apiResponse.getValue());
+                bank.setAddition(apiResponse.getTzep());
 
                 banks.add(bank);
             }
 
-            // Сохраняем данные в базу и возвращаем сохранённые объекты
             return bankRepository.saveAll(banks);
         }
 
-        // Если запрос не удался, выбрасываем исключение
-        throw new RuntimeException("Не удалось получить данные из API");
+        throw new RuntimeException("Can't get data from API");
     }
 }
