@@ -1,50 +1,134 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="uk">
 <head>
     <meta charset="UTF-8">
-    <title>Загрузка банковских данных</title>
-    <script src="script.js" defer></script>
-    <link rel="stylesheet" href="css/styles.css">
+    <title>Крипто Дані</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f4f4;
+            color: #333;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            text-align: left;
+        }
+
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        hr {
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+
+        p {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        p a button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 16px;
+        }
+
+        p a button:hover {
+            background-color: #0056b3;
+        }
+
+        button {
+            margin: 10px;
+            padding: 12px 25px;
+            border: none;
+            background-color: #28a745; /* Green button */
+            color: white;
+            cursor: pointer;
+            border-radius: 5px;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #1e7e34;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #fff;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: left;
+        }
+
+        th {
+            background-color: #f8f9fa;
+            color: #333;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        td {
+            text-align: center;
+        }
+
+        tbody tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+
+        tbody tr:hover {
+            background-color: #e9ecef;
+        }
+    </style>
 </head>
 <body>
-<h1>Загрузка данных банков</h1>
+<hr>
+<p>
+    <a href="/movies.html">
+        <button>Перейти до Фільмів</button>
+    </a>
+</p>
+<h1>Криптовалютні Тікери</h1>
 
-<!-- Year selection dropdown -->
-<label for="yearSelect">Выберите год:</label>
-<select id="yearSelect">
-    <!-- Add some default years or populate dynamically -->
-    <option value="2023">2023</option>
-    <option value="2022">2022</option>
-    <option value="2021">2021</option>
-    <!-- Add more years as needed -->
-</select>
-<!-- Table to display bank data -->
-<table border="1" id="bankTable">
+<div style="text-align: center; margin-bottom: 20px;">
+    <button onclick="fetchAndDisplayData()">Вивантажити всю криптовалюту</button>
+    <button onclick="downloadExcel()">Завантажити в Excel</button>
+</div>
+
+<table id="cryptoTable">
     <thead>
     <tr>
-        <th>Рег. номер</th>
-        <th>Название</th>
-        <th>Краткое название</th>
-        <th>Полное название</th>
-        <th>Адрес</th>
-        <th>Страна</th>
-        <th>Группа банка</th>
-        <th>МФО</th>
-        <th>Тип</th>
-        <th>Описание</th> <!-- New column for description -->
-        <th>Значение</th> <!-- New column for value -->
-        <th>Дата</th> <!-- New column for date -->
-        <th>ТЗЭП</th> <!-- New column for tzep -->
+        <th>ID</th>
+        <th>Символ</th>
+        <th>Назва</th>
+        <th>Ранг</th>
+        <th>Ціна (USD)</th>
+        <th>Змін. 24год (%)</th>
+        <th>Капіталізація (USD)</th>
+        <th>Об'єм 24год</th>
     </tr>
     </thead>
-    <tbody id="bankTableBody">
-    <!-- Rows will be dynamically populated -->
+    <tbody id="cryptoTableBody">
     </tbody>
 </table>
 
-<!-- Buttons -->
-<button onclick="scrapeData()">Собрать данные</button>
-<button onclick="fetchListings()">Показать объявления</button>
-
+<script src="script.js" defer></script>
 </body>
+
 </html>
