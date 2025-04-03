@@ -63,7 +63,7 @@ async function scrapeAndRefresh() {
 
     try {
         const scrapeResponse = await fetch(`${API_MOVIES_BASE}/scrape`, {
-            method: 'POST',
+            method: 'GET',
         });
 
         if (!scrapeResponse.ok) {
