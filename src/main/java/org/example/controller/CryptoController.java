@@ -29,27 +29,18 @@ public class CryptoController {
     @GetMapping("/fetch")
     public Mono<ResponseEntity<List<Cryptocurrency>>> fetchAndSave() {
         return coinLoreApiService.fetchAndSaveTickers()
-                .map(savedList -> ResponseEntity.ok(savedList)) // Если успешно, возвращаем 200 OK и список
-                .defaultIfEmpty(ResponseEntity.notFound().build()) // Если Mono пустой (редко в этом случае)
-                .onErrorResume(e -> { // Базовая обработка ошибок
+                .map(savedList -> ResponseEntity.ok(savedList))
+                .defaultIfEmpty(ResponseEntity.notFound().build())
+                .onErrorResume(e -> {
                     System.err.println("Error fetching data: " + e.getMessage());
                     return Mono.just(ResponseEntity.status(500).build());
                 });
     }
 
-    // Эндпоинт для получения всех данных из БД
-    @GetMapping("/all")
-    public ResponseEntity<List<Cryptocurrency>> getAll() {
-        List<Cryptocurrency> cryptos = coinLoreApiService.getAllCryptocurrencies();
-        return ResponseEntity.ok(cryptos);
-    }
-
-
-    // Эндпоинт для скачивания Excel файла
     @GetMapping("/export/excel")
     public ResponseEntity<InputStreamResource> exportToExcel() throws IOException {
         String filename = "cryptocurrencies.xlsx";
-        InputStreamResource file = new InputStreamResource(exportService.generateExcel());
+        InputStreamResource file = new InputStreamResource(exportService.generateExcelForCrypto());
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)

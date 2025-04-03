@@ -15,45 +15,27 @@ import java.time.Year;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/movies") // Базовый путь для API фильмов
+@RequestMapping("/api/movies")
 public class MovieController {
 
     @Autowired
     private MovieScraperService movieScraperService;
 
     @Autowired
-    private ExportService exportService; // Инжектим сервис экспорта
+    private ExportService exportService;
 
-    /**
-     * Запускает процесс скрапинга и сохранения фильмов.
-     * Принимает параметры года "с" и "по".
-     */
-    @PostMapping("/scrape") // Используем POST для действия, изменяющего состояние
-    public ResponseEntity<List<Movie>> scrapeMovies(
-            @RequestParam(required = false) Integer yearFrom,
-            @RequestParam(required = false) Integer yearTo) {
 
-        // Устанавливаем значения по умолчанию, если параметры не переданы
-        int currentYear = Year.now().getValue();
-        int from = (yearFrom != null && yearFrom > 1800) ? yearFrom : 1990; // Дефолтное начало
-        int to = (yearTo != null && yearTo <= currentYear) ? yearTo : currentYear; // Дефолтный конец
-
-        if (from > to) { // Простая валидация
-            return ResponseEntity.badRequest().body(null); // Возвращаем ошибку 400
-        }
-
-        List<Movie> processedMovies = movieScraperService.scrapeAndSaveMovies(from, to);
-        // Возвращаем список обработанных (сохраненных/обновленных) фильмов
+    @GetMapping("/scrape")
+    public ResponseEntity<List<Movie>> scrapeMovies() {
+        List<Movie> processedMovies = movieScraperService.scrapeAndSaveMovies();
         return ResponseEntity.ok(processedMovies);
     }
 
-    /**
-     * Получает список фильмов из БД, отфильтрованный по годам.
-     */
-    @GetMapping("/load") // Or any other path you prefer, like /get
+
+    @GetMapping("/load")
     public ResponseEntity<List<Movie>> loadMovies(
-            @RequestParam(required = false) Integer yearFrom,
-            @RequestParam(required = false) Integer yearTo) {
+            @RequestParam Integer yearFrom,
+            @RequestParam Integer yearTo) {
 
         int currentYear = Year.now().getValue();
         int from = (yearFrom != null && yearFrom > 1800) ? yearFrom : 1990;
@@ -67,13 +49,11 @@ public class MovieController {
         return ResponseEntity.ok(movies);
     }
 
-    /**
-     * Экспортирует отфильтрованные фильмы в CSV.
-     */
-    @GetMapping("/export/csv")
-    public ResponseEntity<InputStreamResource> exportMoviesToCsv(
-            @RequestParam(required = false) Integer yearFrom,
-            @RequestParam(required = false) Integer yearTo) throws IOException {
+
+    @GetMapping("/export/xlsx")
+    public ResponseEntity<InputStreamResource> exportMoviesToXlsx(
+            @RequestParam Integer yearFrom,
+            @RequestParam Integer yearTo) throws IOException {
         String filename = "movies.xlsx";
 
         int currentYear = Year.now().getValue();
@@ -81,7 +61,6 @@ public class MovieController {
         int to = (yearTo != null && yearTo <= currentYear) ? yearTo : currentYear;
 
         if (from > to) {
-            // Можно вернуть пустой файл или ошибку
             return ResponseEntity.badRequest().build();
         }
 

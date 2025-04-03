@@ -12,5 +12,5 @@ public interface MovieRepository extends JpaRepository<Movie, Long> {
 
     List<Movie> findByReleaseYearBetweenOrderByReleaseYearDescTitleAsc(Integer yearFrom, Integer yearTo);
 
-    Optional<Movie> findByTitleAndReleaseYear(String title, Integer releaseYear);
+    Optional<Movie> findByTitle(String title);
 }

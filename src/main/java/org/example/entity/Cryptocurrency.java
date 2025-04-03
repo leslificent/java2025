@@ -1,23 +1,21 @@
 package org.example.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Column;
-// import jakarta.persistence.GeneratedValue; // Если ID генерируется базой
-// import jakarta.persistence.GenerationType;
-import lombok.Data; // Если используете Lombok
-import lombok.NoArgsConstructor;
 import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 
 @Entity
-@Data // Lombok: генерирует геттеры, сеттеры, toString, equals, hashCode
-@NoArgsConstructor // Lombok: конструктор без аргументов
-@AllArgsConstructor // Lombok: конструктор со всеми аргументами
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class Cryptocurrency {
 
-    @Id // Используем ID из CoinLore как первичный ключ
+    @Id
     private String id;
 
     private String symbol;
@@ -25,7 +23,7 @@ public class Cryptocurrency {
     private String nameid;
     private Integer rank;
 
-    @Column(precision = 19, scale = 4) // Пример для точного хранения цены
+    @Column(precision = 19, scale = 4)
     private BigDecimal price_usd;
 
     private String percent_change_24h;
@@ -39,11 +37,10 @@ public class Cryptocurrency {
     private BigDecimal volume24;
 
     @Column(precision = 19, scale = 4)
-    private BigDecimal volume24a; // volume24 native
+    private BigDecimal volume24a;
 
-    private String csupply; // Circulating supply
-    private String tsupply; // Total supply
-    private String msupply; // Max supply
+    private String csupply;
+    private String tsupply;
+    private String msupply;
 
-    // Добавьте другие поля по необходимости
 }

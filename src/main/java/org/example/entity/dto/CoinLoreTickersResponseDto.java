@@ -1,4 +1,4 @@
-package org.example.entity;
+package org.example.entity.dto;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.Data;
@@ -9,5 +9,4 @@ import java.util.List;
 @JsonIgnoreProperties(ignoreUnknown = true)
 public class CoinLoreTickersResponseDto {
     private List<CoinLoreTickerDto> data;
-    // Могут быть и другие поля в ответе API (например, "info")
 }

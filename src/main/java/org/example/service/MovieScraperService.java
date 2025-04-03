@@ -25,9 +25,8 @@ public class MovieScraperService {
 
     private static final Logger log = LoggerFactory.getLogger(MovieScraperService.class);
     private static final String BASE_URL = "https://ua.hdrezka.fm/f/cat=352/r-rating_kinopoisk=1;10/r-year=1925;2025/order_by=rating_kinopoisk/order=desc";
-    private static final int TOTAL_PAGES = 10; // Скрапинг первых 10 страниц
+    private static final int TOTAL_PAGES = 10;
 
-    // Обновленные селекторы для ua.hdrezka.fm
     private static final String MOVIE_ITEM_SELECTOR = "div.postItem";
     private static final String TITLE_SELECTOR = "div.postItem div.postitem-title a";
     private static final String INFO_SELECTOR = "div.postItem div.postItem-title span.misc";
@@ -38,75 +37,66 @@ public class MovieScraperService {
     private MovieRepository movieRepository;
 
     @Transactional
-    public List<Movie> scrapeAndSaveMovies(Integer yearFrom, Integer yearTo) {
-        log.info("Запуск скрапинга фильмов с {} по {} год с первых {} страниц: {}", yearFrom, yearTo, TOTAL_PAGES, BASE_URL);
+    public List<Movie> scrapeAndSaveMovies() {
+        log.info("Запуск скрапінга фільмів з перших {} сторінок: {}", TOTAL_PAGES, BASE_URL);
         List<Movie> savedOrUpdatedMovies = new ArrayList<>();
 
         for (int page = 1; page <= TOTAL_PAGES; page++) {
             String pageUrl = BASE_URL + (page > 1 ? "/page/" + page + "/" : "/");
-            log.info("Скрапинг страницы: {}", pageUrl);
+            log.info("Скрапінг сторінки: {}", pageUrl);
 
             try {
-                Document doc = Jsoup.connect(pageUrl).userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36").timeout(20000).get();                Elements movieItems = doc.select(MOVIE_ITEM_SELECTOR);
-                log.info("Найдено {} элементов фильмов на странице {}.", movieItems.size(), page);
+                Document doc = Jsoup.connect(pageUrl).userAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36").timeout(20000).get();
+                Elements movieItems = doc.select(MOVIE_ITEM_SELECTOR);
+                log.info("Знайдено {} елементів фільмів на сторінці {}.", movieItems.size(), page);
 
                 for (Element item : movieItems) {
                     try {
-                        String title = item.selectFirst(TITLE_SELECTOR).text();
-                        String infoLine = item.selectFirst(INFO_SELECTOR).text();
+                        String title = Objects.requireNonNull(item.selectFirst(TITLE_SELECTOR)).text();
+                        String infoLine = Objects.requireNonNull(item.selectFirst(INFO_SELECTOR)).text();
 
                         Integer year = parseYear(infoLine);
                         String genres = parseGenres(infoLine);
 
-                        if (title != null && !title.isEmpty() && year != null && genres != null && !genres.isEmpty()) {
-                            if (year >= yearFrom && year <= yearTo) {
-                                Optional<Movie> existingMovieOpt = movieRepository.findByTitleAndReleaseYear(title, year);
+                        if (!title.isEmpty() && year != null && genres != null && !genres.isEmpty()) {
+                            Optional<Movie> existingMovieOpt = movieRepository.findByTitle(title);
 
-                                if (existingMovieOpt.isPresent()) {
-                                    Movie existingMovie = existingMovieOpt.get();
-                                    if (!Objects.equals(existingMovie.getGenres(), genres)) {
-                                        log.debug("Обновление жанров для фильма: '{}' ({})", title, year);
-                                        existingMovie.setGenres(genres);
-                                        savedOrUpdatedMovies.add(movieRepository.save(existingMovie));
-                                    } else {
-                                        savedOrUpdatedMovies.add(existingMovie);
-                                    }
+                            if (existingMovieOpt.isPresent()) {
+                                Movie existingMovie = existingMovieOpt.get();
+                                if (!Objects.equals(existingMovie.getGenres(), genres)) {
+                                    log.debug("Оновлення жанрів для фільма: '{}' ({})", title, year);
+                                    existingMovie.setGenres(genres);
+                                    savedOrUpdatedMovies.add(movieRepository.save(existingMovie));
                                 } else {
-                                    log.debug("Найден новый фильм: '{}' ({})", title, year);
-                                    Movie newMovie = new Movie(title, year, genres);
-                                    savedOrUpdatedMovies.add(movieRepository.save(newMovie));
+                                    savedOrUpdatedMovies.add(existingMovie);
                                 }
                             } else {
-                                log.trace("Фильм '{}' ({}) отфильтрован по году.", title, year);
+                                log.debug("Знайдено новий фільм: '{}' ({})", title, year);
+                                Movie newMovie = new Movie(title, year, genres);
+                                savedOrUpdatedMovies.add(movieRepository.save(newMovie));
                             }
                         } else {
-                            log.warn("Не удалось извлечь название, год или жанры для одного из элементов на странице {}.", page);
+                            log.warn("Не вдалося знайти назву, рік або жанри для одного з елементів на сторінці {}.", page);
                         }
                     } catch (Exception e) {
-                        log.error("Ошибка при парсинге элемента фильма на странице {}: {}", page, e.getMessage());
+                        log.error("Помилка під час парсингу елемента фільма на сторінці {}: {}", page, e.getMessage());
                     }
                 }
 
             } catch (IOException e) {
-                log.error("Ошибка при подключении или чтении URL {}: {}", pageUrl, e.getMessage(), e);
+                log.error("Помилка при підключенні або зчитуванні URL {}: {}", pageUrl, e.getMessage(), e);
             }
         }
 
-        log.info("Скрапинг завершен. Обработано (сохранено/обновлено/найдено) {} фильмов в диапазоне {}-{}",
-                savedOrUpdatedMovies.size(), yearFrom, yearTo);
+        log.info("Скрапінг завершено. Оброблено (збережено/оновлено/знайдено) {} фільмів", savedOrUpdatedMovies.size());
         return savedOrUpdatedMovies;
     }
 
-    /**
-     * Получает список фильмов из базы данных, отфильтрованный по году.
-     */
     public List<Movie> getMovies(Integer yearFrom, Integer yearTo) {
-        log.info("Запрос фильмов из БД за период с {} по {}", yearFrom, yearTo);
+        log.info("Запит фільмів з БД за період з {} по {}", yearFrom, yearTo);
         return movieRepository.findByReleaseYearBetweenOrderByReleaseYearDescTitleAsc(yearFrom, yearTo);
     }
 
-
-    // --- Вспомогательные методы ---
 
     private Integer parseYear(String infoLine) {
         if (infoLine == null || infoLine.isEmpty()) {
@@ -117,7 +107,7 @@ public class MovieScraperService {
             try {
                 return Integer.parseInt(matcher.group(1));
             } catch (NumberFormatException e) {
-                log.warn("Не удалось спарсить год из найденной строки '{}'", matcher.group(1));
+                log.warn("Не вдалося спарсити рік зі знайденого рядка '{}'", matcher.group(1));
                 return null;
             }
         }
@@ -128,10 +118,10 @@ public class MovieScraperService {
         if (infoLine == null || infoLine.isEmpty()) {
             return null;
         }
+
         Matcher matcher = YEAR_PATTERN.matcher(infoLine);
         if (matcher.find()) {
             int yearEndIndex = matcher.end();
-            // Extract the substring after the year and the following comma and space (if present)
             String genres = infoLine.substring(yearEndIndex).trim();
             if (genres.startsWith(",")) {
                 genres = genres.substring(1).trim();

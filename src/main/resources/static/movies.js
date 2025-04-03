@@ -1,126 +1,100 @@
-/**
- * Frontend JavaScript for Movie Data Page
- */
-
 const API_MOVIES_BASE = '/api/movies';
 
-// Получаем элементы управления
 const yearFromInput = document.getElementById('yearFrom');
 const yearToInput = document.getElementById('yearTo');
 const scrapeButton = document.getElementById('scrapeButton');
-const loadMoviesButton = document.getElementById('loadMoviesButton'); // Получаем новую кнопку
-const downloadCsvButton = document.getElementById('downloadCsvButton');
+const loadMoviesButton = document.getElementById('loadMoviesButton');
+const downloadXlsxButton = document.getElementById('downloadXlsxButton');
 const moviesTableBody = document.getElementById('moviesTableBody');
 const loadingIndicator = document.getElementById('loadingIndicatorMovies');
 
-// --- Функции ---
 
-/**
- * Управляет видимостью индикатора загрузки.
- */
 function setLoadingMovies(isLoading) {
     loadingIndicator.style.display = isLoading ? 'block' : 'none';
 }
 
-/**
- * Получает значения годов из полей ввода.
- * @returns {object} Объект { yearFrom, yearTo } или null при ошибке.
- */
+
 function getYearRange() {
     const yearFrom = parseInt(yearFromInput.value, 10);
     const yearTo = parseInt(yearToInput.value, 10);
     const currentYear = new Date().getFullYear();
 
-    // Простая валидация
     if (isNaN(yearFrom) || isNaN(yearTo) || yearFrom < 1888 || yearTo > currentYear + 1 || yearFrom > yearTo) {
-        alert('Пожалуйста, введите корректный диапазон годов.');
+        alert('Будь ласка, введіть коректний діапазон років.');
         return null;
     }
     return { yearFrom, yearTo };
 }
 
-/**
- * Запрашивает данные с бэкенда и отображает их в таблице.
- */
+
 async function fetchAndDisplayMovies() {
     const range = getYearRange();
-    if (!range) return; // Выход если годы некорректны
+    if (!range) return;
 
     setLoadingMovies(true);
-    moviesTableBody.innerHTML = ''; // Очищаем таблицу
+    moviesTableBody.innerHTML = '';
 
     try {
         const response = await fetch(`${API_MOVIES_BASE}/load?yearFrom=${range.yearFrom}&yearTo=${range.yearTo}`);
         if (!response.ok) {
-            throw new Error(`Ошибка сети: ${response.status} ${response.statusText}`);
+            throw new Error(`Помилка мережі: ${response.status} ${response.statusText}`);
         }
         const movies = await response.json();
         displayMoviesInTable(movies);
     } catch (error) {
-        console.error('Ошибка при получении списка фильмов:', error);
-        alert(`Не удалось загрузить список фильмов: ${error.message}`);
-        // Показываем сообщение об ошибке в таблице
+        console.error('Помилка при отриманні списку фільмів:', error);
+        alert(`Не вдалося завантажити список фільмів: ${error.message}`);
         const row = moviesTableBody.insertRow();
         const cell = row.insertCell();
         cell.colSpan = 4; // Количество колонок
-        cell.textContent = `Ошибка загрузки: ${error.message}`;
+        cell.textContent = `Помилка завантаження: ${error.message}`;
     } finally {
         setLoadingMovies(false);
     }
 }
 
-/**
- * Запускает процесс скрапинга на бэкенде, а затем обновляет таблицу.
- */
+
 async function scrapeAndRefresh() {
     const range = getYearRange();
     if (!range) return;
 
     setLoadingMovies(true);
-    console.log(`Запуск скрапинга для диапазона: ${range.yearFrom}-${range.yearTo}`);
+    console.log(`Запуск скрапінга для діапазона: ${range.yearFrom}-${range.yearTo}`);
 
     try {
-        // Отправляем POST запрос для запуска скрапинга
-        const scrapeResponse = await fetch(`${API_MOVIES_BASE}/scrape?yearFrom=${range.yearFrom}&yearTo=${range.yearTo}`, {
+        const scrapeResponse = await fetch(`${API_MOVIES_BASE}/scrape`, {
             method: 'POST',
         });
 
         if (!scrapeResponse.ok) {
-            // Попытка прочитать тело ошибки, если оно есть
             let errorBody = '';
-            try { errorBody = await scrapeResponse.text(); } catch(e) {/* ignore */}
-            throw new Error(`Ошибка при запуске скрапинга: ${scrapeResponse.status} ${scrapeResponse.statusText}. ${errorBody}`);
+            try { errorBody = await scrapeResponse.text(); } catch(e) {}
+            throw new Error(`Помилка при запуску скрапінга: ${scrapeResponse.status} ${scrapeResponse.statusText}. ${errorBody}`);
         }
 
         const processedMovies = await scrapeResponse.json();
-        console.log('Скрапинг завершен на бэкенде. Обработано:', processedMovies);
-        alert(`Обновление завершено. Найдено/обновлено ${processedMovies.length} фильмов.`);
+        console.log('Скрапінг завершено на бекенді. Оброблено:', processedMovies);
+        alert(`Оновлення завершено. Знайдено/оновлено ${processedMovies.length} фільмів.`);
 
-        // После успешного скрапинга, можно автоматически обновить таблицу, если нужно
-        // await fetchAndDisplayMovies();
 
     } catch (error) {
-        console.error('Ошибка в процессе скрапинга и обновления:', error);
-        alert(`Ошибка: ${error.message}`);
-        // Можно попробовать загрузить данные, которые уже есть в БД
-        await fetchAndDisplayMovies(); // Загружаем то, что есть
+        console.error('Помилка в процесі скрапінга і оновлення:', error);
+        alert(`Помилка: ${error.message}`);
+        await fetchAndDisplayMovies();
     } finally {
-        setLoadingMovies(false); // Убираем индикатор в любом случае
+        setLoadingMovies(false);
     }
 }
 
 
-/**
- * Отображает массив фильмов в таблице.
- */
 function displayMoviesInTable(movies) {
-    moviesTableBody.innerHTML = ''; // Очищаем перед заполнением
+    moviesTableBody.innerHTML = '';
 
     if (!movies || movies.length === 0) {
         const row = moviesTableBody.insertRow();
         const cell = row.insertCell();
         cell.colSpan = 4; // Количество колонок
-        cell.textContent = 'Фильмы в указанном диапазоне не найдены или еще не загружены.';
+        cell.textContent = 'Фільми у вказаному діапазоні не знайдені або ще не завантажені.';
         return;
     }
 
@@ -128,30 +102,22 @@ function displayMoviesInTable(movies) {
         const row = moviesTableBody.insertRow();
         row.insertCell().textContent = movie.title || '';
         row.insertCell().textContent = movie.releaseYear !== null ? movie.releaseYear : '';
-        row.insertCell().textContent = movie.genres || ''; // Отображаем жанры
-        row.insertCell().textContent = movie.id || ''; // ID из БД
+        row.insertCell().textContent = movie.genres || '';
+        row.insertCell().textContent = movie.id || '';
     });
 }
 
-/**
- * Инициирует скачивание CSV файла с отфильтрованными данными.
- */
-function downloadMoviesCsv() {
+
+function downloadMoviesXlsx() {
     const range = getYearRange();
     if (!range) return;
 
-    const url = `${API_MOVIES_BASE}/export/csv?yearFrom=${range.yearFrom}&yearTo=${range.yearTo}`;
-    console.log('Запрос на скачивание CSV:', url);
-    // Простой способ инициировать скачивание через перенаправление
+    const url = `${API_MOVIES_BASE}/export/xlsx?yearFrom=${range.yearFrom}&yearTo=${range.yearTo}`;
+    console.log('Запит на завантаження Excel:', url);
     window.location.href = url;
 }
 
 
-// --- Привязка обработчиков событий ---
 scrapeButton.addEventListener('click', scrapeAndRefresh);
-loadMoviesButton.addEventListener('click', fetchAndDisplayMovies); // Обработчик для новой кнопки
-downloadCsvButton.addEventListener('click', downloadMoviesCsv);
-
-// --- Инициализация ---
-// Загрузить данные при первой загрузке страницы (можно убрать, если не нужно при загрузке)
-// window.addEventListener('load', fetchAndDisplayMovies);
+loadMoviesButton.addEventListener('click', fetchAndDisplayMovies);
+downloadXlsxButton.addEventListener('click', downloadMoviesXlsx);

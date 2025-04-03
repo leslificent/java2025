@@ -5,52 +5,29 @@ import lombok.Data;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.util.Objects;
-
 @Entity
-@Data // Lombok
+@Data
 @NoArgsConstructor
-// Добавляем уникальный составной ключ на название и год, чтобы избежать дубликатов
-@Table(name = "movies", uniqueConstraints = {
-        @UniqueConstraint(columnNames = {"title", "year"})
-})
+@Table(name = "movies")
 @Getter
 public class Movie {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // Автоинкремент ID
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @Column(nullable = false)
     private String title;
 
     @Column(nullable = false)
-    private Integer releaseYear; // Год фильма
+    private Integer releaseYear;
 
     @Column(nullable = false)
-    private String genres; // Жанры фильма
+    private String genres;
 
-    // Конструктор для удобства создания
     public Movie(String title, Integer releaseYear, String genres) {
         this.title = title;
         this.releaseYear = releaseYear;
         this.genres = genres;
-    }
-
-    // Переопределяем equals и hashCode для корректной работы с коллекциями
-    // и для возможной проверки на существование по объекту (хотя мы будем использовать title+year)
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Movie movie = (Movie) o;
-        // Считаем фильмы одинаковыми, если совпадают название и год
-        return Objects.equals(title, movie.title) &&
-                Objects.equals(releaseYear, movie.releaseYear);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(title, releaseYear);
     }
 }
