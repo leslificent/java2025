@@ -54,11 +54,11 @@ function displayDataInTable(cryptos) {
         row.insertCell().textContent = crypto.id || '';
         row.insertCell().textContent = crypto.symbol || '';
         row.insertCell().textContent = crypto.name || '';
-        row.insertCell().textContent = crypto.rank !== null ? crypto.rank : ''; // rank может быть 0
+        row.insertCell().textContent = crypto.rank !== null ? crypto.rank : '';
 
         const priceUsdCell = row.insertCell();
         priceUsdCell.textContent = crypto.price_usd !== null ? parseFloat(crypto.price_usd).toFixed(4) : '';
-        priceUsdCell.style.textAlign = 'right'; // Выравнивание по правому краю для чисел
+        priceUsdCell.style.textAlign = 'right';
 
         const change24hCell = row.insertCell();
         change24hCell.textContent = crypto.percent_change_24h ? `${crypto.percent_change_24h}%` : '';

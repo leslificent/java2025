@@ -9,7 +9,6 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @Table(name = "movies")
-@Getter
 public class Movie {
 
     @Id
